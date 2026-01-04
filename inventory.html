@@ -87,7 +87,7 @@
         const AUTH = "Bearer RahasiaTST2026";
         
         async function load() {
-            const res = await fetch('http://localhost:8000/api/packages/', { headers: { "Authorization": AUTH } });
+            const res = await fetch('https://18223015.tesatepadang.space/api/packages/', { headers: { "Authorization": AUTH } });
             const data = await res.json();
             
             document.getElementById('count-total').innerText = data.length;
@@ -151,7 +151,7 @@
 
         async function ship(id) {
             const courier = document.getElementById(`courier-${id}`).value;
-            await fetch(`http://localhost:8000/api/packages/${id}/ship/`, {
+            await fetch(`https://18223015.tesatepadang.space/api/packages/${id}/ship/`, {
                 method: 'POST',
                 headers: { "Content-Type": "application/json", "Authorization": AUTH },
                 body: JSON.stringify({ courier_name: courier })
@@ -168,7 +168,7 @@
                 width: parseFloat(document.getElementById('W').value),
                 height: parseFloat(document.getElementById('H').value),
             };
-            await fetch('http://localhost:8000/api/packages/', {
+            await fetch('https://18223015.tesatepadang.space/api/packages/', {
                 method: 'POST',
                 headers: { "Content-Type": "application/json", "Authorization": AUTH },
                 body: JSON.stringify(payload)

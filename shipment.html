@@ -58,7 +58,7 @@
             const pid = document.getElementById('search-id').value;
             if(!pid) return alert("Masukkan nomor resi dulu!");
 
-            const res = await fetch('http://localhost:8001/api/shipments/', { 
+            const res = await fetch('https://18223042.tesatepadang.space/api/shipments/', { 
                 headers: { "Authorization": AUTH } 
             });
             const data = await res.json();
@@ -135,7 +135,7 @@
                 payload = { status: 'DELIVERED' };
             }
 
-            await fetch(`http://localhost:8001/api/shipments/${sid}/`, {
+            await fetch(`https://18223042.tesatepadang.space/api/shipments/${sid}/`, {
                 method: 'PATCH',
                 headers: { "Content-Type": "application/json", "Authorization": AUTH },
                 body: JSON.stringify(payload)
