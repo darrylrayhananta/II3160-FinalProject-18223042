@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><title>Inventory | LogiTrack</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="min-h-screen flex flex-col">
+    <!-- Top Navigation -->
+    <header class="glass sticky top-0 z-50 px-8 py-4 flex items-center relative">
+        <div class="flex items-center gap-3">
+            <div class="bg-gradient-to-br from-emerald-400 to-teal-600 p-2.5 rounded-xl shadow-lg shadow-emerald-200">
+                <i data-lucide="package-search" class="text-white w-6 h-6"></i>
+            </div>
+            <span class="text-xl font-black tracking-tight text-emerald-950">Logi<span class="text-emerald-500">Track</span></span>
+        </div>
+        <nav class="hidden md:flex gap-8 absolute left-1/2 -translate-x-1/2">
+            <a href="index.html" class="nav-item text-sm font-bold text-slate-500 hover:text-emerald-600">Dashboard</a>
+            <a href="inventory.html" class="nav-item active text-sm font-bold text-slate-500 hover:text-emerald-600">Inventory</a>
+            <a href="shipment.html" class="nav-item text-sm font-bold text-slate-500 hover:text-emerald-600">Shipments</a>
+        </nav>
+        <div class="flex items-center gap-4 ml-auto">
+            <button onclick="document.getElementById('modal').classList.remove('hidden')" class="bg-emerald-600 text-white px-5 py-2.5 rounded-xl font-bold shadow-lg shadow-emerald-200 hover:bg-emerald-700 transition flex items-center gap-2 text-sm">
+                <i data-lucide="plus" class="w-4 h-4"></i> Add Item
+            </button>
+        </div>
+    </header>
+
+    <main class="flex-1 p-8 max-w-7xl mx-auto w-full">
+        <div class="flex justify-between items-end mb-8">
+            <div>
+                <h2 class="text-3xl font-black text-emerald-950">Warehouse Stock</h2>
+                <p class="text-emerald-600/80 font-medium mt-1">Manage inventory and dispatch shipments.</p>
+            </div>
+            <div class="flex gap-2">
+                <span class="px-3 py-1 bg-white rounded-lg text-xs font-bold text-slate-500 border border-emerald-100">Total: <span id="count-total">0</span></span>
+            </div>
+        </div>
+
+        <!-- Inventory Grid -->
+        <div id="inventory-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Cards will be injected here -->
+        </div>
+
+        <!-- Modal -->
+        <div id="modal" class="fixed inset-0 bg-emerald-950/60 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50 transition-all duration-300">
+            <div class="bg-white rounded-[2rem] p-8 w-full max-w-md shadow-2xl animate-fade-in border border-emerald-100 relative">
+                <button onclick="document.getElementById('modal').classList.add('hidden')" class="absolute top-6 right-6 text-slate-300 hover:text-slate-500 transition"><i data-lucide="x"></i></button>
+                
+                <div class="mb-6">
+                    <div class="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mb-4 text-emerald-600">
+                        <i data-lucide="package-plus"></i>
+                    </div>
+                    <h3 class="text-2xl font-black text-emerald-900">New Package</h3>
+                    <p class="text-sm text-slate-500">Enter package details to register in warehouse.</p>
+                </div>
+
+                <form id="addForm" class="space-y-4">
+                    <div>
+                        <label class="text-xs font-bold text-slate-400 uppercase ml-1">Package Name</label>
+                        <input type="text" id="name" class="w-full bg-slate-50 border border-slate-200 p-3 rounded-xl outline-emerald-500 font-semibold text-slate-700 mt-1" required>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-xs font-bold text-slate-400 uppercase ml-1">Weight (kg)</label>
+                            <input type="number" id="weight" class="w-full bg-slate-50 border border-slate-200 p-3 rounded-xl outline-emerald-500 font-semibold text-slate-700 mt-1" required>
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-slate-400 uppercase ml-1">Dimensions (cm)</label>
+                            <div class="flex gap-1 mt-1">
+                                <input type="number" id="L" placeholder="L" class="w-full bg-slate-50 border border-slate-200 p-3 rounded-xl outline-emerald-500 font-semibold text-slate-700 text-center" required>
+                                <input type="number" id="W" placeholder="W" class="w-full bg-slate-50 border border-slate-200 p-3 rounded-xl outline-emerald-500 font-semibold text-slate-700 text-center" required>
+                                <input type="number" id="H" placeholder="H" class="w-full bg-slate-50 border border-slate-200 p-3 rounded-xl outline-emerald-500 font-semibold text-slate-700 text-center" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="w-full bg-emerald-600 text-white py-4 rounded-xl font-bold shadow-lg hover:bg-emerald-700 transition mt-4">Register Package</button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        lucide.createIcons();
+        const AUTH = "Bearer RahasiaTST2026";
+        
+        async function load() {
+            const res = await fetch('http://localhost:8000/api/packages/', { headers: { "Authorization": AUTH } });
+            const data = await res.json();
+            
+            document.getElementById('count-total').innerText = data.length;
+
+            document.getElementById('inventory-grid').innerHTML = data.map(p => {
+                const isPending = p.status === 'PENDING';
+                const statusColor = isPending ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700';
+                const icon = isPending ? 'clock' : 'check-circle';
+
+                return `
+                    <div class="inventory-card bg-white p-6 rounded-[1.5rem] border border-emerald-50 shadow-sm flex flex-col justify-between h-full">
+                        <div>
+                            <div class="flex justify-between items-start mb-4">
+                                <div class="p-3 bg-slate-50 rounded-xl">
+                                    <i data-lucide="box" class="text-slate-400"></i>
+                                </div>
+                                <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase ${statusColor} flex items-center gap-1">
+                                    <i data-lucide="${icon}" class="w-3 h-3"></i> ${p.status}
+                                </span>
+                            </div>
+                            <h4 class="text-lg font-bold text-slate-800 leading-tight mb-1">${p.name}</h4>
+                            <p class="text-xs text-slate-400 font-mono mb-4">ID: #${p.id}</p>
+                            
+                            <div class="flex gap-2 mb-6">
+                                <div class="bg-slate-50 px-3 py-2 rounded-lg text-xs font-bold text-slate-500">
+                                    ${p.weight} kg
+                                </div>
+                                <div class="bg-slate-50 px-3 py-2 rounded-lg text-xs font-bold text-slate-500">
+                                    ${p.length}x${p.width}x${p.height} cm
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            ${isPending ? `
+                                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                    <label class="text-[10px] font-bold text-slate-400 uppercase block mb-2">Dispatch via</label>
+                                    <div class="flex gap-2">
+                                        <select id="courier-${p.id}" class="flex-1 text-xs border-none bg-white p-2 rounded-lg font-bold text-slate-600 outline-none shadow-sm">
+                                            <option value="TST-Express">TST Express</option>
+                                            <option value="JNE">JNE</option>
+                                            <option value="J&T">J&T</option>
+                                            <option value="SiCepat">SiCepat</option>
+                                        </select>
+                                        <button onclick="ship(${p.id})" class="bg-emerald-500 text-white p-2 rounded-lg hover:bg-emerald-600 transition shadow-md">
+                                            <i data-lucide="send" class="w-4 h-4"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            ` : `
+                                <div class="w-full bg-emerald-50 py-3 rounded-xl text-center text-xs font-bold text-emerald-600 border border-emerald-100">
+                                    Shipment Initiated
+                                </div>
+                            `}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            lucide.createIcons();
+        }
+
+        async function ship(id) {
+            const courier = document.getElementById(`courier-${id}`).value;
+            await fetch(`http://localhost:8000/api/packages/${id}/ship/`, {
+                method: 'POST',
+                headers: { "Content-Type": "application/json", "Authorization": AUTH },
+                body: JSON.stringify({ courier_name: courier })
+            });
+            load();
+        }
+
+        document.getElementById('addForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const payload = {
+                name: document.getElementById('name').value,
+                weight: parseFloat(document.getElementById('weight').value),
+                length: parseFloat(document.getElementById('L').value),
+                width: parseFloat(document.getElementById('W').value),
+                height: parseFloat(document.getElementById('H').value),
+            };
+            await fetch('http://localhost:8000/api/packages/', {
+                method: 'POST',
+                headers: { "Content-Type": "application/json", "Authorization": AUTH },
+                body: JSON.stringify(payload)
+            });
+            document.getElementById('modal').classList.add('hidden');
+            load();
+        };
+
+        load();
+    </script>
+</body>
+</html>

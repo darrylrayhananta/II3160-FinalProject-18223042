@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>LogiTrack</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="min-h-screen flex flex-col">
+    <!-- Top Navigation -->
+    <header class="glass sticky top-0 z-50 px-8 py-4 flex items-center relative">
+        <div class="flex items-center gap-3">
+            <div class="bg-gradient-to-br from-emerald-400 to-teal-600 p-2.5 rounded-xl shadow-lg shadow-emerald-200">
+                <i data-lucide="package-search" class="text-white w-6 h-6"></i>
+            </div>
+            <span class="text-xl font-black tracking-tight text-emerald-950">Logi<span class="text-emerald-500">Track</span></span>
+        </div>
+        <nav class="hidden md:flex gap-8 absolute left-1/2 -translate-x-1/2">
+            <a href="index.html" class="nav-item active text-sm font-bold text-slate-500 hover:text-emerald-600">Dashboard</a>
+            <a href="inventory.html" class="nav-item text-sm font-bold text-slate-500 hover:text-emerald-600">Inventory</a>
+            <a href="shipment.html" class="nav-item text-sm font-bold text-slate-500 hover:text-emerald-600">Shipments</a>
+        </nav>
+        <div class="flex items-center gap-4 ml-auto">
+            <div id="api-status" class="flex gap-2"></div>
+        </div>
+    </header>
+
+    <main class="flex-1 p-8 max-w-7xl mx-auto w-full space-y-8">
+        <!-- Hero Section -->
+        <div class="bg-emerald-900 rounded-[2.5rem] p-10 text-white relative overflow-hidden shadow-2xl shadow-emerald-200 animate-fade-in">
+            <div class="absolute top-0 right-0 w-96 h-96 bg-emerald-500 rounded-full blur-[100px] opacity-30 translate-x-1/3 -translate-y-1/3"></div>
+            <div class="relative z-10 flex flex-col md:flex-row justify-between items-end gap-6">
+                <div>
+                    <p class="text-emerald-300 font-bold uppercase tracking-widest text-xs mb-2">System Overview</p>
+                    <h1 class="text-4xl md:text-5xl font-black mb-4 leading-tight">Operational <br>Dashboard</h1>
+                    <p class="text-emerald-100/80 max-w-lg font-medium">
+                        Real-time synchronization between Warehouse Core (Repo 1) and Shipment Service (Repo 2).
+                    </p>
+                </div>
+                <div class="flex gap-4">
+                    <div class="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/10">
+                        <p class="text-xs text-emerald-200 uppercase font-bold">Server Time</p>
+                        <p class="text-xl font-mono font-bold" id="clock">--:--</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bento Grid Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- Total Inventory -->
+            <div class="glass-card p-6 rounded-[2rem] relative overflow-hidden group hover:border-emerald-300 transition-colors animate-fade-in" style="animation-delay: 0.1s">
+                <div class="absolute -right-4 -bottom-4 text-emerald-50 opacity-50 group-hover:scale-110 transition-transform duration-500">
+                    <i data-lucide="archive" class="w-32 h-32"></i>
+                </div>
+                <div class="relative z-10">
+                    <div class="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center mb-4 text-emerald-600">
+                        <i data-lucide="box"></i>
+                    </div>
+                    <h3 id="stat-total" class="text-4xl font-black text-emerald-900 mb-1">0</h3>
+                    <p class="text-sm font-bold text-slate-400">Total Inventory</p>
+                </div>
+            </div>
+
+            <!-- In Transit -->
+            <div class="glass-card p-6 rounded-[2rem] relative overflow-hidden group hover:border-teal-300 transition-colors animate-fade-in" style="animation-delay: 0.2s">
+                <div class="absolute -right-4 -bottom-4 text-teal-50 opacity-50 group-hover:scale-110 transition-transform duration-500">
+                    <i data-lucide="truck" class="w-32 h-32"></i>
+                </div>
+                <div class="relative z-10">
+                    <div class="w-10 h-10 bg-teal-100 rounded-full flex items-center justify-center mb-4 text-teal-600">
+                        <i data-lucide="map"></i>
+                    </div>
+                    <h3 id="stat-shipped" class="text-4xl font-black text-teal-900 mb-1">0</h3>
+                    <p class="text-sm font-bold text-slate-400">In Transit</p>
+                </div>
+            </div>
+
+            <!-- Pending -->
+            <div class="glass-card p-6 rounded-[2rem] relative overflow-hidden group hover:border-amber-300 transition-colors animate-fade-in" style="animation-delay: 0.3s">
+                <div class="absolute -right-4 -bottom-4 text-amber-50 opacity-50 group-hover:scale-110 transition-transform duration-500">
+                    <i data-lucide="clock" class="w-32 h-32"></i>
+                </div>
+                <div class="relative z-10">
+                    <div class="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center mb-4 text-amber-600">
+                        <i data-lucide="loader"></i>
+                    </div>
+                    <h3 id="stat-pending" class="text-4xl font-black text-amber-900 mb-1">0</h3>
+                    <p class="text-sm font-bold text-slate-400">Pending</p>
+                </div>
+            </div>
+
+            <!-- Delivered -->
+            <div class="glass-card p-6 rounded-[2rem] relative overflow-hidden group hover:border-green-300 transition-colors animate-fade-in" style="animation-delay: 0.4s">
+                <div class="absolute -right-4 -bottom-4 text-green-50 opacity-50 group-hover:scale-110 transition-transform duration-500">
+                    <i data-lucide="check-circle" class="w-32 h-32"></i>
+                </div>
+                <div class="relative z-10">
+                    <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mb-4 text-green-600">
+                        <i data-lucide="check"></i>
+                    </div>
+                    <h3 id="stat-delivered" class="text-4xl font-black text-green-900 mb-1">0</h3>
+                    <p class="text-sm font-bold text-slate-400">Delivered</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions / Info -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 animate-fade-in" style="animation-delay: 0.5s">
+            <div class="md:col-span-2 glass-card p-8 rounded-[2rem] flex flex-col justify-center bg-gradient-to-r from-white to-emerald-50/50">
+                <h3 class="text-2xl font-bold text-emerald-900 mb-2">Quick Navigation</h3>
+                <p class="text-slate-500 mb-6">Jump directly to manage your logistics operations.</p>
+                <div class="flex gap-4">
+                    <a href="inventory.html" class="flex-1 bg-white border border-emerald-100 p-4 rounded-xl shadow-sm hover:shadow-md transition flex items-center gap-3 group">
+                        <div class="bg-emerald-100 p-2 rounded-lg group-hover:bg-emerald-500 group-hover:text-white transition">
+                            <i data-lucide="plus"></i>
+                        </div>
+                        <span class="font-bold text-emerald-900">Add Inventory</span>
+                    </a>
+                    <a href="shipment.html" class="flex-1 bg-white border border-emerald-100 p-4 rounded-xl shadow-sm hover:shadow-md transition flex items-center gap-3 group">
+                        <div class="bg-teal-100 p-2 rounded-lg group-hover:bg-teal-500 group-hover:text-white transition">
+                            <i data-lucide="search"></i>
+                        </div>
+                        <span class="font-bold text-teal-900">Track Package</span>
+                    </a>
+                </div>
+            </div>
+            <div class="glass-card p-8 rounded-[2rem] flex flex-col items-center justify-center text-center">
+                <div class="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mb-4 animate-pulse">
+                    <i data-lucide="activity" class="text-emerald-500 w-8 h-8"></i>
+                </div>
+                <h4 class="font-bold text-lg text-emerald-900">System Healthy</h4>
+                <p class="text-xs text-slate-400 mt-1">All microservices are operational</p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        lucide.createIcons();
+        const AUTH = "Bearer RahasiaTST2026";
+
+        // Clock
+        setInterval(() => {
+            const now = new Date();
+            document.getElementById('clock').innerText = now.toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit'});
+        }, 1000);
+
+        async function loadStats() {
+            try {
+                const [resWarehouse, resShipment] = await Promise.all([
+                    fetch('http://localhost:8000/api/packages/', { headers: { "Authorization": AUTH } }),
+                    fetch('http://localhost:8001/api/shipments/', { headers: { "Authorization": AUTH } })
+                ]);
+
+                const warehouseData = await resWarehouse.json();
+                const shipmentData = await resShipment.json();
+
+                document.getElementById('stat-total').innerText = warehouseData.length;
+                document.getElementById('stat-pending').innerText = warehouseData.filter(p => p.status === 'PENDING').length;
+                document.getElementById('stat-shipped').innerText = warehouseData.filter(p => p.status === 'SHIPPED').length;
+                document.getElementById('stat-delivered').innerText = shipmentData.filter(s => s.status === 'DELIVERED').length;
+
+                document.getElementById('api-status').innerHTML = `
+                    <div class="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-100 rounded-full border border-emerald-200">
+                        <div class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+                        <span class="text-[10px] font-bold text-emerald-700 uppercase">Warehouse</span>
+                    </div>
+                    <div class="flex items-center gap-1.5 px-3 py-1.5 bg-teal-100 rounded-full border border-teal-200">
+                        <div class="w-2 h-2 bg-teal-500 rounded-full animate-pulse"></div>
+                        <span class="text-[10px] font-bold text-teal-700 uppercase">Shipment</span>
+                    </div>
+                `;
+            } catch (e) {
+                console.error(e);
+                document.getElementById('api-status').innerHTML = `
+                    <span class="px-3 py-1 rounded-full bg-red-100 text-red-700 text-xs font-bold">API Error</span>
+                `;
+            }
+        }
+
+        loadStats();
+    </script>
+</body>
+</html>
