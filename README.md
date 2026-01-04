@@ -1,11 +1,11 @@
-# II3160 Final Project - Integrated Logistics UI
+# II3160 Final Project - LogiTrack
 
 **Tugas Ujian Akhir Semester**  
 **Mata Kuliah:** II3160 - Teknologi Sistem Terintegrasi  
 
 ---
 
-## Student Information
+## Dibuat Oleh:
 **Nama:** Darryl Rayhananta Adenan  
 **NIM:** 18223042  
 
