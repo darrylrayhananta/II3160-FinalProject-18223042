@@ -5,16 +5,18 @@
 
 ---
 
-## Dibuat Oleh:
-**Nama:** Darryl Rayhananta Adenan  
-**NIM:** 18223042  
+## Anggota Kelompok:
+| Nama | NIM |
+|------|-----|
+| Darryl Rayhananta Adenan | 18223042 |
+| Muhammad Adam Mirza | 18223015 |
 
 ---
 
 ## Project Overview
 Website ini adalah antarmuka pengguna (Integrated UI) untuk sistem manajemen logistik yang mengintegrasikan dua layanan mikro (microservices):
-1. **Warehouse Service** (Port 8000): Mengelola inventaris barang.
-2. **Shipment Service** (Port 8001): Mengelola status pengiriman dan pelacakan paket.
+1. **Warehouse Service**: Mengelola inventaris barang.
+2. **Shipment Service**: Mengelola status pengiriman dan pelacakan paket.
 
 ### Fitur Utama
 - **Dashboard (`index.html`)**: Menampilkan ringkasan statistik sistem secara real-time (Total Inventory, In Transit, Pending, Delivered).
@@ -33,9 +35,86 @@ Website ini adalah antarmuka pengguna (Integrated UI) untuk sistem manajemen log
 - **Icons**: Lucide Icons
 - **Font**: Plus Jakarta Sans
 
+---
+
 ## Cara Menjalankan
-1. Pastikan kedua backend service (Warehouse & Shipment) sudah berjalan pada port masing-masing:
-   - Warehouse Service: `http://localhost:8000`
-   - Shipment Service: `http://localhost:8001`
-2. Buka file `index.html` menggunakan browser modern (Chrome, Edge, Firefox).
-3. Navigasi melalui menu di bagian atas untuk mengakses fitur Inventory dan Shipment.
+
+### Prasyarat
+- Browser modern (Chrome, Edge, Firefox)
+- Koneksi internet (untuk TailwindCSS CDN dan Lucide Icons)
+- Backend services sudah berjalan dan dapat diakses
+
+### Langkah-langkah
+
+#### 1. Clone Repository
+```bash
+git clone https://github.com/username/II3160-FinalProject-18223042.git
+cd II3160-FinalProject-18223042
+```
+
+#### 2. Jalankan dengan Live Server (Rekomendasi)
+**Menggunakan VS Code:**
+1. Install extension **Live Server**
+2. Klik kanan pada `index.html`
+3. Pilih **Open with Live Server**
+4. Browser akan terbuka otomatis di `http://127.0.0.1:5500`
+
+**Atau menggunakan Python:**
+```bash
+# Python 3
+python -m http.server 5500
+
+# Buka browser ke http://localhost:5500
+```
+
+**Atau menggunakan Node.js:**
+```bash
+npx serve .
+
+# Buka browser ke http://localhost:3000
+```
+
+#### 3. Akses Aplikasi
+| Halaman | URL | Fungsi |
+|---------|-----|--------|
+| Dashboard | `index.html` | Lihat statistik sistem |
+| Inventory | `inventory.html` | Kelola package |
+| Shipment | `shipment.html` | Track pengiriman |
+
+---
+
+## API Endpoints
+
+### Warehouse API (18223015)
+| Method | Endpoint | Keterangan |
+|--------|----------|------------|
+| GET | `/api/packages/` | Ambil semua package |
+| POST | `/api/packages/` | Buat package baru |
+| GET | `/api/packages/{id}/` | Detail package |
+| PATCH | `/api/packages/{id}/` | Update package |
+
+### Shipment API (18223042)
+| Method | Endpoint | Keterangan |
+|--------|----------|------------|
+| GET | `/api/shipments/` | Ambil semua shipment |
+| POST | `/api/shipments/` | Buat shipment baru |
+| GET | `/api/shipments/{id}/` | Detail shipment |
+| PATCH | `/api/shipments/{id}/` | Update status/lokasi |
+
+### Authorization
+Semua API endpoint memerlukan header:
+```
+Authorization: Bearer {API_TOKEN}
+```
+
+---
+
+## Struktur Folder
+```
+II3160-FinalProject-18223042/
+├── index.html        # Dashboard
+├── inventory.html    # Inventory Management
+├── shipment.html     # Shipment Tracking
+├── style.css         # Custom Styles
+└── README.md         # Dokumentasi
+```
