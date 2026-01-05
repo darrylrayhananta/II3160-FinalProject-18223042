@@ -132,8 +132,8 @@
                                             <option value="J&T">J&T</option>
                                             <option value="SiCepat">SiCepat</option>
                                         </select>
-                                        <button onclick="ship(${p.id})" class="bg-emerald-500 text-white p-2 rounded-lg hover:bg-emerald-600 transition shadow-md">
-                                            <i data-lucide="send" class="w-4 h-4"></i>
+                                        <button type="button" onclick="ship(${p.id})" class="bg-emerald-500 text-white p-2 rounded-lg hover:bg-emerald-600 transition shadow-md cursor-pointer">
+                                            <i data-lucide="send" class="w-4 h-4 pointer-events-none"></i>
                                         </button>
                                     </div>
                                 </div>
@@ -150,13 +150,87 @@
         }
 
         async function ship(id) {
-            const courier = document.getElementById(`courier-${id}`).value;
-            await fetch(`https://18223015.tesatepadang.space/api/packages/${id}/ship/`, {
-                method: 'POST',
-                headers: { "Content-Type": "application/json", "Authorization": AUTH },
-                body: JSON.stringify({ courier_name: courier })
-            });
-            load();
+            try {
+                const courier = document.getElementById(`courier-${id}`).value;
+                
+                // Create shipment di API Shipment (18223042)
+                const shipRes = await fetch('https://18223042.tesatepadang.space/api/shipments/', {
+                    method: 'POST',
+                    headers: { "Content-Type": "application/json", "Authorization": AUTH },
+                    body: JSON.stringify({ 
+                        package_id: id,
+                        courier_name: courier 
+                    })
+                });
+
+                // Debug: lihat response dari API
+                const responseData = await shipRes.json();
+                console.log('Ship response status:', shipRes.status);
+                console.log('Ship response:', responseData);
+
+                if (!shipRes.ok) {
+                    alert('Failed to ship package: ' + JSON.stringify(responseData));
+                    return;
+                }
+
+                // Tampilkan tracking number dari response
+                if (responseData.tracking_number) {
+                    showTrackingModal(responseData.tracking_number, courier);
+                } else {
+                    alert('Package shipped! Check Shipments page for tracking.');
+                }
+                
+                load();
+            } catch (error) {
+                console.error('Ship error:', error);
+                alert('Error: ' + error.message);
+            }
+        }
+
+        function showTrackingModal(trackingNumber, courier) {
+            const modalHtml = `
+                <div id="tracking-modal" class="fixed inset-0 bg-emerald-950/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+                    <div class="bg-white rounded-[2rem] p-8 w-full max-w-md shadow-2xl animate-fade-in border border-emerald-100 text-center">
+                        <div class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i data-lucide="check-circle" class="w-8 h-8 text-emerald-600"></i>
+                        </div>
+                        <h3 class="text-xl font-black text-slate-800 mb-2">Shipment Created!</h3>
+                        <p class="text-sm text-slate-500 mb-6">Package has been dispatched via ${courier}</p>
+                        
+                        <div class="bg-emerald-50 p-4 rounded-xl mb-6">
+                            <p class="text-xs font-bold text-emerald-600 uppercase mb-1">Your Tracking Number</p>
+                            <p class="text-2xl font-black text-emerald-900 tracking-wide">${trackingNumber}</p>
+                        </div>
+                        
+                        <div class="flex gap-3">
+                            <button onclick="copyTracking('${trackingNumber}')" class="flex-1 bg-emerald-100 text-emerald-700 py-3 rounded-xl font-bold hover:bg-emerald-200 transition flex items-center justify-center gap-2">
+                                <i data-lucide="copy" class="w-4 h-4"></i> Copy
+                            </button>
+                            <button onclick="goToTracking('${trackingNumber}')" class="flex-1 bg-emerald-600 text-white py-3 rounded-xl font-bold hover:bg-emerald-700 transition flex items-center justify-center gap-2">
+                                <i data-lucide="external-link" class="w-4 h-4"></i> Track
+                            </button>
+                        </div>
+                        
+                        <button onclick="closeTrackingModal()" class="mt-4 text-slate-400 text-sm hover:text-slate-600">Close</button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            lucide.createIcons();
+        }
+
+        function copyTracking(trackingNumber) {
+            navigator.clipboard.writeText(trackingNumber);
+            alert('Tracking number copied: ' + trackingNumber);
+        }
+
+        function goToTracking(trackingNumber) {
+            window.location.href = `shipment.html?track=${trackingNumber}`;
+        }
+
+        function closeTrackingModal() {
+            document.getElementById('tracking-modal')?.remove();
         }
 
         document.getElementById('addForm').onsubmit = async (e) => {

@@ -48,11 +48,64 @@
                 <p class="text-sm text-slate-300 mt-2">Enter a valid tracking number above to see details.</p>
             </div>
         </div>
+
+        <!-- All Shipments List -->
+        <div class="bg-white rounded-[2rem] p-6 shadow-lg border border-emerald-50">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-slate-800">All Shipments</h3>
+                <button onclick="loadAllShipments()" class="text-emerald-600 text-sm font-bold hover:underline flex items-center gap-1">
+                    <i data-lucide="refresh-cw" class="w-4 h-4"></i> Refresh
+                </button>
+            </div>
+            <div id="all-shipments" class="space-y-3">
+                <p class="text-sm text-slate-400 text-center py-4">Loading shipments...</p>
+            </div>
+        </div>
     </main>
 
     <script>
         lucide.createIcons();
         const AUTH = "Bearer RahasiaTST2026";
+
+        // Auto-track from URL parameter
+        window.onload = function() {
+            const params = new URLSearchParams(window.location.search);
+            const trackingNum = params.get('track');
+            if (trackingNum) {
+                document.getElementById('search-id').value = trackingNum;
+                track();
+            }
+            loadAllShipments();
+        };
+
+        async function loadAllShipments() {
+            const res = await fetch('https://18223042.tesatepadang.space/api/shipments/', {
+                headers: { "Authorization": AUTH }
+            });
+            const shipments = await res.json();
+
+            if (shipments.length === 0) {
+                document.getElementById('all-shipments').innerHTML = `
+                    <p class="text-sm text-slate-400 text-center py-4">No shipments found</p>
+                `;
+                return;
+            }
+
+            document.getElementById('all-shipments').innerHTML = shipments.map(s => `
+                <div class="bg-slate-50 p-4 rounded-xl flex justify-between items-center hover:bg-slate-100 transition cursor-pointer" onclick="document.getElementById('search-id').value='${s.tracking_number}'; track();">
+                    <div>
+                        <p class="font-bold text-slate-800">${s.tracking_number}</p>
+                        <p class="text-xs text-slate-400">Package #${s.package_id} • ${s.courier_name}</p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="text-xs text-slate-500 hidden md:block">${s.current_location}</span>
+                        <span class="px-2 py-1 rounded-full text-[10px] font-bold ${s.status === 'DELIVERED' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}">
+                            ${s.status}
+                        </span>
+                    </div>
+                </div>
+            `).join('');
+        }
 
         async function track() {
             const pid = document.getElementById('search-id').value;
@@ -102,14 +155,9 @@
                     <!-- Actions -->
                     <div class="p-8 bg-slate-50 border-t border-slate-100">
                         ${!isDelivered ? `
-                            <p class="text-xs font-bold text-slate-400 uppercase mb-3">Update Status</p>
-                            <div class="flex gap-3">
-                                <input id="updLoc" type="text" placeholder="New City..." class="flex-1 bg-white border border-slate-200 p-3 rounded-xl outline-emerald-500 font-bold text-sm">
-                                <button onclick="updateStatus(${s.id}, 'location')" class="bg-emerald-600 text-white px-4 rounded-xl font-bold hover:bg-emerald-700 transition text-sm">Update</button>
-                                <button onclick="updateStatus(${s.id}, 'delivered')" class="bg-emerald-100 text-emerald-700 px-4 rounded-xl font-bold hover:bg-emerald-200 transition text-sm">
-                                    <i data-lucide="check" class="w-4 h-4"></i>
-                                </button>
-                            </div>
+                            <button onclick="markDelivered(${s.id})" class="w-full bg-emerald-600 text-white py-4 rounded-xl font-bold hover:bg-emerald-700 transition flex items-center justify-center gap-2">
+                                <i data-lucide="check-circle" class="w-5 h-5"></i> Mark as Delivered
+                            </button>
                         ` : `
                             <div class="flex items-center gap-3 text-emerald-600 bg-emerald-100/50 p-4 rounded-xl">
                                 <i data-lucide="check-circle" class="w-6 h-6"></i>
@@ -125,22 +173,31 @@
             lucide.createIcons();
         }
 
-        async function updateStatus(sid, type) {
-            let payload = {};
-            if(type === 'location') {
-                const loc = document.getElementById('updLoc').value;
-                if(!loc) return alert("Isi lokasi dulu!");
-                payload = { current_location: loc };
-            } else {
-                payload = { status: 'DELIVERED' };
-            }
+        async function markDelivered(sid) {
+            try {
+                const res = await fetch(`https://18223042.tesatepadang.space/api/shipments/${sid}/`, {
+                    method: 'PATCH',
+                    headers: { "Content-Type": "application/json", "Authorization": AUTH },
+                    body: JSON.stringify({ 
+                        status: 'DELIVERED',
+                        location: 'Destination (Received by Customer)'
+                    })
+                });
 
-            await fetch(`https://18223042.tesatepadang.space/api/shipments/${sid}/`, {
-                method: 'PATCH',
-                headers: { "Content-Type": "application/json", "Authorization": AUTH },
-                body: JSON.stringify(payload)
-            });
-            track();
+                const data = await res.json();
+                console.log('Update response:', data);
+
+                if (!res.ok) {
+                    alert('Failed to update: ' + JSON.stringify(data));
+                    return;
+                }
+
+                track();
+                loadAllShipments();
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error: ' + error.message);
+            }
         }
     </script>
 </body>
