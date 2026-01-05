@@ -158,7 +158,7 @@
 
                 document.getElementById('stat-total').innerText = warehouseData.length;
                 document.getElementById('stat-pending').innerText = warehouseData.filter(p => p.status === 'PENDING').length;
-                document.getElementById('stat-shipped').innerText = warehouseData.filter(p => p.status === 'SHIPPED').length;
+                document.getElementById('stat-shipped').innerText = shipmentData.filter(s => s.status === 'IN_TRANSIT').length;
                 document.getElementById('stat-delivered').innerText = shipmentData.filter(s => s.status === 'DELIVERED').length;
 
                 document.getElementById('api-status').innerHTML = `
