@@ -1,120 +1,65 @@
-# II3160 Final Project - LogiTrack
+# LogiTrack
 
-**Tugas Ujian Akhir Semester**  
-**Mata Kuliah:** II3160 - Teknologi Sistem Terintegrasi  
+> Dashboard logistik terpadu yang menghubungkan Warehouse Service dan Shipment Service dalam satu antarmuka web.
 
----
+## Ringkasan
 
-## Anggota Kelompok:
-| Nama | NIM |
-|------|-----|
-| Darryl Rayhananta Adenan | 18223042 |
-| Muhammad Adam Mirza | 18223015 |
+LogiTrack adalah frontend final project **II3160 — Teknologi Sistem Terintegrasi**. Aplikasi ini memperlihatkan bagaimana dua microservice dapat digunakan dari satu alur pengguna: paket dicatat di gudang, dikirim ke kurir, menerima nomor resi, lalu dilacak hingga selesai.
 
----
+| Aspek | Detail |
+|---|---|
+| Jenis proyek | Integrated frontend untuk dua REST service |
+| Teknologi | HTML5, Tailwind CSS, JavaScript, Lucide Icons |
+| Gaya UI | Responsive glassmorphism dengan tema logistik |
+| Build step | Tidak ada; dapat dijalankan sebagai static site |
 
-## Project Overview
-Website ini adalah antarmuka pengguna (Integrated UI) untuk sistem manajemen logistik yang mengintegrasikan dua layanan mikro (microservices):
-1. **Warehouse Service**: Mengelola inventaris barang.
-2. **Shipment Service**: Mengelola status pengiriman dan pelacakan paket.
+## Alur Pengguna
 
-### Fitur Utama
-- **Dashboard (`index.html`)**: Menampilkan ringkasan statistik sistem secara real-time (Total Inventory, In Transit, Pending, Delivered).
-- **Inventory Management (`inventory.html`)**: 
-  - Melihat daftar stok barang di gudang.
-  - Menambahkan barang baru.
-  - Memulai proses pengiriman ke kurir.
-- **Shipment Tracking (`shipment.html`)**: 
-  - Melacak status paket menggunakan nomor resi.
-  - Memperbarui lokasi paket.
-  - Menandai paket sebagai "Delivered".
-
-## Tech Stack
-- **Frontend**: HTML5, CSS3
-- **Styling**: TailwindCSS (via CDN), Custom CSS (Glassmorphism & Eco-Futuristic Theme)
-- **Icons**: Lucide Icons
-- **Font**: Plus Jakarta Sans
-
----
-
-## Cara Menjalankan
-
-### Prasyarat
-- Browser modern (Chrome, Edge, Firefox)
-- Koneksi internet (untuk TailwindCSS CDN dan Lucide Icons)
-- Backend services sudah berjalan dan dapat diakses
-
-### Langkah-langkah
-
-#### 1. Clone Repository
-```bash
-git clone https://github.com/username/II3160-FinalProject-18223042.git
-cd II3160-FinalProject-18223042
+```text
+Dashboard
+   ├── Inventory ──► Warehouse API
+   │                    │
+   │                    └── buat / perbarui paket
+   └── Shipments ──► Shipment API
+                        └── buat resi / lacak / tandai delivered
 ```
 
-#### 2. Jalankan dengan Live Server (Rekomendasi)
-**Menggunakan VS Code:**
-1. Install extension **Live Server**
-2. Klik kanan pada `index.html`
-3. Pilih **Open with Live Server**
-4. Browser akan terbuka otomatis di `http://127.0.0.1:5500`
+## Fitur
 
-**Atau menggunakan Python:**
+- Dashboard statistik total paket, pending, in transit, dan delivered.
+- Daftar serta pembuatan paket pada Warehouse Service.
+- Inisiasi pengiriman dan penampilan nomor resi.
+- Pelacakan shipment berdasarkan nomor resi.
+- Pembaruan status pengiriman menjadi `DELIVERED`.
+- Indikator ketersediaan kedua API.
+
+## Halaman
+
+| File | Fungsi |
+|---|---|
+| `index.html` | Ringkasan sistem dan status integrasi |
+| `inventory.html` | Pengelolaan stok dan proses dispatch |
+| `shipment.html` | Daftar, pencarian, dan pembaruan shipment |
+| `style.css` | Styling tambahan di luar Tailwind CSS |
+
+## Menjalankan Secara Lokal
+
 ```bash
-# Python 3
+git clone https://github.com/darrylrayhananta/II3160-FinalProject-LogiTrack.git
+cd II3160-FinalProject-LogiTrack
 python -m http.server 5500
-
-# Buka browser ke http://localhost:5500
 ```
 
-**Atau menggunakan Node.js:**
-```bash
-npx serve .
+Buka `http://localhost:5500`.
 
-# Buka browser ke http://localhost:3000
-```
+Frontend membutuhkan koneksi internet untuk memuat Tailwind CSS dan Lucide Icons dari CDN. Backend Warehouse dan Shipment juga harus dapat diakses dari browser.
 
-#### 3. Akses Aplikasi
-| Halaman | URL | Fungsi |
-|---------|-----|--------|
-| Dashboard | `index.html` | Lihat statistik sistem |
-| Inventory | `inventory.html` | Kelola package |
-| Shipment | `shipment.html` | Track pengiriman |
+## Catatan Integrasi dan Keamanan
 
----
+URL API dan token pada versi ini dikonfigurasi langsung di file HTML untuk kebutuhan demonstrasi akademik. Pada sistem produksi, konfigurasi tersebut sebaiknya dipindahkan ke backend-for-frontend atau mekanisme environment/runtime config agar token tidak terekspos di browser.
 
-## API Endpoints
+## Tim
 
-### Warehouse API (18223015)
-| Method | Endpoint | Keterangan |
-|--------|----------|------------|
-| GET | `/api/packages/` | Ambil semua package |
-| POST | `/api/packages/` | Buat package baru |
-| GET | `/api/packages/{id}/` | Detail package |
-| PATCH | `/api/packages/{id}/` | Update package |
+- Darryl Rayhananta Adenan — 18223042
+- Muhammad Adam Mirza — 18223015
 
-### Shipment API (18223042)
-| Method | Endpoint | Keterangan |
-|--------|----------|------------|
-| GET | `/api/shipments/` | Ambil semua shipment |
-| POST | `/api/shipments/` | Buat shipment baru |
-| GET | `/api/shipments/{id}/` | Detail shipment |
-| PATCH | `/api/shipments/{id}/` | Update status/lokasi |
-
-### Authorization
-Semua API endpoint memerlukan header:
-```
-Authorization: Bearer {API_TOKEN}
-```
-
----
-
-## Struktur Folder
-```
-II3160-FinalProject-18223042/
-├── index.html        # Dashboard
-├── inventory.html    # Inventory Management
-├── shipment.html     # Shipment Tracking
-├── style.css         # Custom Styles
-└── README.md         # Dokumentasi
-```
